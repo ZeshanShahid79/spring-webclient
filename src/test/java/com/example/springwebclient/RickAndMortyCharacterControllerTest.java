@@ -2,8 +2,7 @@ package com.example.springwebclient;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +29,19 @@ class RickAndMortyCharacterControllerTest {
     @BeforeAll
     static void setup() throws IOException {
         mockWebServer = new MockWebServer();
-        mockWebServer.start();
+        mockWebServer.start(8081);
+    }
+
+    @AfterEach
+    void reset() throws IOException {
+        mockWebServer.shutdown();
+        mockWebServer = new MockWebServer();
+        mockWebServer.start(8081);
+    }
+
+    @AfterAll
+    static void cleanUp() throws IOException {
+        mockWebServer.close();
     }
 
     @DynamicPropertySource
@@ -48,6 +59,84 @@ class RickAndMortyCharacterControllerTest {
                         "results": [
                         {
                                 "id": 20,
+                                "name": "Ants in my Eyes Johnson",
+                                "species": "Human",
+                                "status": "unknown",
+                                "origin": {
+                                    "name": "unknown",
+                                    "url": ""
+                                }
+                        }
+                        ]
+                        }
+                        """));
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                        "results": [
+                        {
+                                "id": 21,
+                                "name": "Ants in my Eyes Johnson",
+                                "species": "Human",
+                                "status": "unknown",
+                                "origin": {
+                                    "name": "unknown",
+                                    "url": ""
+                                }
+                        }
+                        ]
+                        }
+                        """));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                            [
+                                {
+                                    "id": 20,
+                                    "name": "Ants in my Eyes Johnson",
+                                    "species": "Human",
+                                    "status": "unknown",
+                                    "origin": {
+                                        "name": "unknown",
+                                        "url": ""
+                                    }
+                                }
+                            ]
+                        """));
+    }
+
+    @Test
+    void getAllCharacters() throws Exception {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                        "results": [
+                        {
+                                "id": 20,
+                                "name": "Ants in my Eyes Johnson",
+                                "species": "Human",
+                                "status": "unknown",
+                                "origin": {
+                                    "name": "unknown",
+                                    "url": ""
+                                }
+                        }
+                        ]
+                        }
+                        """));
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                        "results": [
+                        {
+                                "id": 21,
                                 "name": "Ants in my Eyes Johnson",
                                 "species": "Human",
                                 "status": "unknown",
