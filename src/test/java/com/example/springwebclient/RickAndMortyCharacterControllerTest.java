@@ -2,6 +2,7 @@ package com.example.springwebclient;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,10 @@ class RickAndMortyCharacterControllerTest {
                                 }
                             ]
                         """));
+
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        assertEquals("/", request.getPath());
     }
 
     @Test
@@ -110,6 +115,10 @@ class RickAndMortyCharacterControllerTest {
                                     }
                                 }
                         """));
+
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        assertEquals("/20", request.getPath());
     }
 
     @Test
@@ -133,7 +142,7 @@ class RickAndMortyCharacterControllerTest {
                         }
                         """));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters?status=unkown"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/status?status=unkown"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                             [
@@ -149,6 +158,10 @@ class RickAndMortyCharacterControllerTest {
                                 }
                             ]
                         """));
+
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        assertEquals("/?status=unkown", request.getPath());
     }
 
     @Test
@@ -156,26 +169,11 @@ class RickAndMortyCharacterControllerTest {
         mockWebServer.enqueue(new MockResponse()
                 .setHeader("Content-Type", "application/json")
                 .setBody("""
-                        {
-                        "results": [
-                        {
-                                "id": 20,
-                                "name": "Ants in my Eyes Johnson",
-                                "species": "Human",
-                                "status": "unknown",
-                                "origin": {
-                                    "name": "unknown",
-                                    "url": ""
-                                }
-                        }
-                        ]
-                        }
-                        """));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters?status=unkown&species=human"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("""
-                            [
+                            {
+                            "info": {
+                            "count": 13
+                            },
+                            "results": [
                                 {
                                     "id": 20,
                                     "name": "Ants in my Eyes Johnson",
@@ -187,6 +185,15 @@ class RickAndMortyCharacterControllerTest {
                                     }
                                 }
                             ]
+                            }
                         """));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/species-statistic?status=unkown&species=human"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("13"));
+
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        assertEquals("/?status=unkown&species=human", request.getPath());
     }
 }
