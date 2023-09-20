@@ -77,4 +77,106 @@ class RickAndMortyCharacterControllerTest {
                             ]
                         """));
     }
+
+    @Test
+    void getCharacterById() throws Exception {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                                "id": 20,
+                                "name": "Ants in my Eyes Johnson",
+                                "species": "Human",
+                                "status": "unknown",
+                                "origin": {
+                                    "name": "unknown",
+                                    "url": ""
+                                }
+                        }
+                        """));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/20"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                                {
+                                    "id": 20,
+                                    "name": "Ants in my Eyes Johnson",
+                                    "species": "Human",
+                                    "status": "unknown",
+                                    "origin": {
+                                        "name": "unknown",
+                                        "url": ""
+                                    }
+                                }
+                        """));
+    }
+
+    @Test
+    void getCharactersByStatus() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                        "results": [
+                        {
+                                "id": 20,
+                                "name": "Ants in my Eyes Johnson",
+                                "species": "Human",
+                                "status": "unknown",
+                                "origin": {
+                                    "name": "unknown",
+                                    "url": ""
+                                }
+                        }
+                        ]
+                        }
+                        """));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/status?status=unkown"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                            [
+                                {
+                                    "id": 20,
+                                    "name": "Ants in my Eyes Johnson",
+                                    "species": "Human",
+                                    "status": "unknown",
+                                    "origin": {
+                                        "name": "unknown",
+                                        "url": ""
+                                    }
+                                }
+                            ]
+                        """));
+    }
+
+    @Test
+    void getStatisticForSpecies() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("""
+                        {
+                            "info": {
+                                "count": 13
+                            },
+                            "results": [
+                                {
+                                    "id": 20,
+                                    "name": "Ants in my Eyes Johnson",
+                                    "species": "Human",
+                                    "status": "unknown",
+                                    "origin": {
+                                        "name": "unknown",
+                                        "url": ""
+                                    }
+                                }
+                            ]
+                        }
+                        """));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/species-statistic?status=unkown&species=human"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("13"));
+    }
 }
